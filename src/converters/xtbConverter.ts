@@ -44,7 +44,7 @@ export class XtbConverter extends AbstractConverter {
                     else if (type.indexOf("sec fee") > -1 || type.indexOf("swap") > -1 || type.indexOf("commission") > -1 || type.indexOf("free funds interests tax") > -1) {
                         return "fee";
                     }
-                    else if (type.indexOf("free funds interests") > -1) {
+                    else if (type.indexOf("free funds interests") > -1 || type.indexOf("free-funds interest") > -1) {
                         return "interest";
                     }
                     else if (type.indexOf("dividend") > -1 || type.indexOf("spin off") > -1) { //verify spinoff
@@ -169,12 +169,34 @@ export class XtbConverter extends AbstractConverter {
                     continue;
                 }
 
+
+// my script
+                const match = record.comment.match(/(?:OPEN|CLOSE) BUY ([0-9]+(?:\.[0-9]+)?(?:\/[0-9]+(?:\.[0-9]+)?)?) @ ([0-9]+(?:\.[0-9]+)?)|(?:[A-Z\. ]+) ([0-9]+(?:\.[0-9]+)?)/);
+
+                let quantity = 0;
+                let unitPrice = 0;
+                const dividendPerShare = match && match[3] ? parseFloat(match[3]) : 0;
+
+                if (match && match[1]) {
+                    // We found matched data so assign accordingly.
+                    quantity = parseFloat(match[1].split("/")[0]);
+                    unitPrice = parseFloat(match[2]);
+                } else {
+                    // Handle no match found: log error or take appropriate action.
+                    console.warn(`[i] No match found for comment: ${record.comment}`);
+                    // Optionally, you may choose to continue to the next record:
+                    // continue;
+                }
+
+// my script end
+
+/*
                 const match = record.comment.match(/(?:OPEN|CLOSE) BUY ([0-9]+(?:\.[0-9]+)?(?:\/[0-9]+(?:\.[0-9]+)?)?) @ ([0-9]+(?:\.[0-9]+)?)|(?:[A-Z\. ]+) ([0-9]+(?:\.[0-9]+)?)/)
 
                 let quantity = parseFloat(match[1]?.split("/")[0]);
                 let unitPrice = parseFloat(match[2]);
                 const dividendPerShare = parseFloat(match[3]);
-
+*/
                 // By default, there is no expected currency.
                 let expectedCurrency = null;
 
